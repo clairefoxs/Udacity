@@ -1,0 +1,57 @@
+---
+title: 'P1: Test a Perceptual Phenomenon'
+author: "Claire Salloum"
+date: "July 23, 2015"
+output: html_document
+---
+
+Psychologists theorize that all incoming sensory information is processed in parallel - regardless of its relevance. This theory is evidenced by the Stroop Effect. For example, the word "red" written using blue ink, takes longer to process than the same word written in red ink. This is the basis of the Stroop Test, which measures participants' reaction times to the colour of words representing either congruent or incongruent colours.
+
+In this test, the **independent** variable is the condition (congruent or incongruent). The **dependent** variable is the length of time taken (in seconds) to name all the colours in an equally sized list.
+
+Below is a descriptive analysis of 24 participants' attempts at the stroop test.
+
+An appropriate **hypothesis** for the stroop test in general, and specifically for our small sample, is that the participants will take longer to name the colours in the incongruent trials than in the congruent trials. The **null hypothesis** is that there is no time difference between the two trials. 
+
+##Descriptive Statistics
+
+```{r, echo=FALSE}
+setwd("~/Desktop/Data Science/Udacity")
+stroop <- read.csv("stroopdata.csv")
+
+means <- c(round(mean(stroop$Congruent),2), round(mean(stroop$Incongruent),2))
+Incongruent <- c(round(mean(stroop$Incongruent),2), round(sd(stroop$Incongruent),2))
+Congruent <- c(round(mean(stroop$Congruent),2), round(sd(stroop$Congruent),2))
+```
+
+```{r, echo=FALSE}
+summary <- data.frame(Congruent, Incongruent, row.names=c("mean", "standard deviation"))
+print(summary)
+
+barplot(means, main = "Stroop Response Times", ylab="Time (seconds)", names.arg = c("Congruent", "Incongruent"), col="lavender")
+```
+
+This bar plot shows that the response times for incongruent trials averaged greater than those from congruent trials. Specificially, the mean for **congruent trials** was `r summary[1,1]` seconds with a standard deviation of `r summary[2,1]`. The mean for **incongruent trials** was `r summary[1,2]` seconds with a standard deviation of `r summary[2,2]`.
+
+So far, the data supports the alternative hypothesis that incongruent trials take longer to respond to than congruent trials. A paired-samples t-test was conducted to compare the length of response time in incongruent and congruent trials.
+
+##Statistical Test
+Paired-samples t-test was chosen because the participants are the same for each condition. Based on my knowledge of prior Stroop tests, my alternative hypothesis is that the response time will be greater for Incongruent than Congruent trials. Therefore I used a one-tailed t-test in the positive direction.
+
+```{r, echo=FALSE}
+library(pander)
+t_crit <- 1.714
+pander(t.test(stroop$Incongruent, stroop$Congruent, paired=TRUE, alternative="greater"))
+statistic <- t.test(stroop$Congruent, stroop$Incongruent, paired=TRUE, alternative="less")$statistic
+p <- t.test(stroop$Congruent, stroop$Incongruent, paired=TRUE, alternative="less")$p.value
+```
+
+There was a significant difference between incongruent(M=`r means[2]`) and congruent(M=`r means[1]`) trials; t(24)=`r round(statistic,3)`, p=`r p`. I therefore reject the null hypothesis.
+
+## Conclusion
+This analysis showed that, in our sample, participants take longer to process the colour of a word if the text represents an incongruent colour. This gives some insight into how visual stimuli are processed in the human sensory system. A possible explanation is that  seeing and processing text is more automatic than seeing a colour and processing it into the appropriate word. In order to test this explanation, I could do a similar test, with black text vs blocks of colour. Comparing the response times for these conditions might give insight into how quickly participants can process colour, without the added factor of text.
+
+References:
+https://en.wikipedia.org/wiki/Stroop_effect
+
+
